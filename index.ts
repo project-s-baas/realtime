@@ -42,12 +42,16 @@ const server = Bun.serve({
 
       // 메시지 게시
       if (type === "publish") {
-        if (event != "*") {
-          // 특정 이벤트에 게시
-          ws.publish(`${channel}:${event}`, JSON.stringify(data));
+        if (event === '*') {
+          console.error("Event '*' is not allowed for publish");
+          return;
         }
-        // 전체 채널에 게시
+        ws.subscribe(`${channel}:*`);
+        ws.subscribe(`${channel}:${event}`);
+
+        ws.publish(`${channel}:${event}`, JSON.stringify(data));
         ws.publish(`${channel}:*`, JSON.stringify(data));
+        
         console.log(`Published to ${event ? `${channel}:${event}` : channel}`);
       }
 
